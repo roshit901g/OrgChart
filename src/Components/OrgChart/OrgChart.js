@@ -58,6 +58,8 @@ export default class OrgChart extends Component {
             previousUrl: "",
             firstUrl: "",
             accessToken: "",
+            flagNextBtn: true,
+            flagPrevBtn: false
 
         };
     }
@@ -66,12 +68,7 @@ export default class OrgChart extends Component {
         const usersScopes = {
             scopes: ["User.Read.All"],
         };
-        // this.context.getAccessToken(usersScopes.scopes).then((accessToken) => {
-        //     console.log("accessToken", accessToken)
-        // });
-        // console.log("globalProviders", Providers.globalProvider);
-        // console.log("SignedIn", ProviderState.SignedIn);
-        // console.log("Scopes", this.usersScopes)
+
         Providers.globalProvider.setState(ProviderState.SignedIn);
 
         const accessToken = await this.context.getAccessToken(usersScopes.scopes);
@@ -79,7 +76,7 @@ export default class OrgChart extends Component {
         let allUsers = await getAllUsers(accessToken);
         this.setState({ firstUrl: allUsers["@odata.nextLink"] })
         allUsers = await this.getUserCollectionWithPhoto(accessToken, allUsers);
-        console.log("all users", allUsers);
+        //console.log("all users", allUsers);
         allUsers = _.orderBy(
             allUsers,
             [(user) => user.displayName.toLowerCase()],
@@ -96,36 +93,41 @@ export default class OrgChart extends Component {
             //newChanges
             accessToken: accessToken,
         });
+        let urls = [];
+        // var newItem = allUsers["@odata.nextLink"];
+        // urls.push(newItem);
+        localStorage.setItem("urls", JSON.stringify(urls));
     }
 
     getUserCollectionWithPhoto = async (accessToken, userArray) => {
 
         console.log("userArray", userArray.value)
-        let prevUrl = this.state.nextUrl;
+        //let prevUrl = this.state.nextUrl;
         let userArr = userArray.value;
 
-        if (prevUrl === userArray["@odata.nextLink"]) {
-            alert("PrevUrl And userArray['@odata.nextLink'] are same ")
+
+        if (userArray["@odata.nextLink"]) {
+            //console.log("nextlink exists")
+            let oldurl = JSON.parse(localStorage.getItem('urls')) || [];
+            var newItem = userArray["@odata.nextLink"];
+            oldurl.push(newItem);
+            console.log("arrayPush=", oldurl);
+            localStorage.setItem('urls', JSON.stringify(oldurl));
+            // if (oldurl[oldurl.length - 2]) {
+            //     this.setState({ nextUrl: userArray["@odata.nextLink"], previousUrl: oldurl[oldurl.length - 2], })
+            // }
+            // else {
+            //     this.setState({ nextUrl: userArray["@odata.nextLink"] });
+            //}
+            this.setState({
+                nextUrl: userArray["@odata.nextLink"]
+            });
         }
-
-        if (this.state.previousUrl === userArray["@odata.nextLink"]) {
-            alert("PreviousUrl And userArray['@odata.nextLink'] are same ")
+        else {
+            console.log("nextlink doesnt exist")
+            this.setState({ flagNextBtn: false })
         }
-
-        if (this.state.nextUrl === userArray["@odata.nextLink"]) {
-            alert("nextUrl And userArray['@odata.nextLink'] are same ")
-        }
-        if (this.state.nextUrl === this.state.previousUrl) {
-            alert("nextUrl And this.state.previousUrl are same ")
-        }
-
-        if (this.state.firstUrl === userArray["@odata.nextLink"]) {
-            alert("youve Reached the end");
-        }
-
-
-
-        this.setState({ nextUrl: userArray["@odata.nextLink"], previousUrl: prevUrl })
+        // this.setState({ nextUrl: userArray["@odata.nextLink"], previousUrl: prevUrl })
 
         let userArrayWithPhoto = [];
         let requests = userArr.map((user) => {
@@ -172,6 +174,14 @@ export default class OrgChart extends Component {
     };
 
     async gotoNext(accessToken, url) {
+
+        let oldurl = JSON.parse(localStorage.getItem('urls')) || [];
+        console.log("array length befor prevClick", oldurl.length)
+        oldurl.splice(0, 1);
+        console.log("array length after prevClick", oldurl.length)
+        localStorage.setItem('urls', JSON.stringify(oldurl));
+
+
         let allUsers = await getAllUsers(accessToken, url);
         allUsers = await this.getUserCollectionWithPhoto(accessToken, allUsers);
         console.log("all users", allUsers);
@@ -192,10 +202,24 @@ export default class OrgChart extends Component {
             accessToken: accessToken,
             // previousUrl: url
         });
+        if (this.state.flagPrevBtn === false) {
+            this.setState({ flagPrevBtn: true })
+        }
     }
 
     async gotoPrev(accessToken, url) {
-        let allUsers = await getAllUsers(accessToken, url);
+
+        let oldurl = JSON.parse(localStorage.getItem('urls')) || [];
+        console.log("array length befor prevClick", oldurl)
+        //let prev = oldurl[oldurl.length - 2];
+        oldurl.splice(-1, 1);
+        console.log("array length after prevClick", oldurl.length)
+        localStorage.setItem('urls', JSON.stringify(oldurl));
+        let prev = oldurl[0];
+
+
+
+        let allUsers = await getAllUsers(accessToken, prev);
         allUsers = await this.getUserCollectionWithPhoto(accessToken, allUsers);
         console.log("all users", allUsers);
         allUsers = _.orderBy(
@@ -215,6 +239,9 @@ export default class OrgChart extends Component {
             accessToken: accessToken,
             //nextUrl: this.state.previousUrl
         });
+        if (this.state.flagNextBtn === false) {
+            this.setState({ flagNextBtn: true })
+        }
     }
 
     async filterItems(requestData) {
@@ -262,12 +289,13 @@ export default class OrgChart extends Component {
         const { departments } = this.state;
         // console.log("nextLink", this.state.nextUrl)
         // console.log("PrevLink", this.state.previousUrl)
-        if (this.state.previousUrl === this.state.nextUrl) {
-            console.log("same in Render");
-        }
-        else {
-            console.log("Different in Render");
-        }
+        // if (this.state.previousUrl === this.state.nextUrl) {
+        //     console.log("same in Render");
+        // }
+        // else {
+        //     console.log("Different in Render");
+        // }
+        console.log("urlArray", localStorage.getItem("urls"));
 
         let userListMarkup = filteredUsers.map((user) => {
             return (
@@ -337,8 +365,14 @@ export default class OrgChart extends Component {
                     {this.state.loading === false ? userListMarkup : <ContentLoader />}
                     <div className="pagenationDiv">
                         <center>
-                            <button className="pagenationBtn" onClick={() => { this.gotoPrev(this.state.accessToken, this.state.previousUrl) }}>&lt;&lt;</button>
-                            <button className="pagenationBtn" onClick={() => { this.gotoNext(this.state.accessToken, this.state.nextUrl) }} >&gt;&gt;</button>
+                            {this.state.flagPrevBtn ?
+                                <button className="pagenationBtn" onClick={() => { this.gotoPrev(this.state.accessToken, this.state.previousUrl) }}>&lt;&lt;</button>
+                                : null}
+                            {this.state.flagNextBtn ?
+                                <button className="pagenationBtn" onClick={() => { this.gotoNext(this.state.accessToken, this.state.nextUrl) }} >&gt;&gt;</button>
+                                : null
+                            }
+
                         </center>
                     </div>
                 </div>
