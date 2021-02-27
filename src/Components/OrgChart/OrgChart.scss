@@ -1,0 +1,125 @@
+.orgchart-container {
+  background: #ffffff 0% 0% no-repeat padding-box;
+  box-shadow: 1px 1px 15px #00000029;
+  border-radius: 5px;
+  opacity: 1;
+  min-height: 100vh;
+  padding-left: 5px;
+  padding-left: 100px !important;
+  padding-right: 100px !important;
+  padding-bottom: 0px !important;
+  .user-list-title-container {
+    .user-list-heading {
+      text-align: left;
+      font: normal normal bold 24px/33px Open Sans;
+      letter-spacing: 0px;
+      color: #495866;
+      opacity: 1;
+    }
+    .fa-sort {
+      color: #007bbe;
+    }
+    .input-group {
+      //width: 85%;
+      width: 100%;
+    }
+    .input-group-text,
+    input {
+      background: #e2e9f3 0% 0% no-repeat padding-box;
+      opacity: 1;
+      border-radius: 0px;
+      text-align: left;
+      font: normal normal normal 16px Open Sans;
+      font-weight: 200;
+      letter-spacing: 0px;
+      color: #848484;
+    }
+    input:focus {
+      border-color: rgba(0, 0, 0, 0);
+      box-shadow: 0 0 0 0rem rgba(0, 0, 0, 0);
+      border-radius: 0px;
+    }
+    .department-filter-container select {
+      text-align: left;
+      font: normal normal normal 16px Open Sans;
+      font-weight: 200;
+      letter-spacing: 0px;
+      color: #848484;
+      border-radius: 0px;
+      opacity: 1;
+      background: #e2e9f3 0% 0% no-repeat padding-box;
+    }
+
+    .department-filter-container .form-control:focus {
+      border-color: rgba(0, 0, 0, 0);
+      box-shadow: 0 0 0 0rem rgba(0, 0, 0, 0);
+      border-radius: 0px;
+    }
+    .department-filter-container {
+      margin-left: 40px;
+      display: none;
+    }
+  }
+  .user-list-container {
+    border-bottom: 2px solid #e6e4e499;
+  }
+  .pagenationBtn {
+    font-weight: 800;
+    font-size: 18px;
+    padding: 10px;
+    /* background: radial-gradient(black, transparent); */
+    background: #94c42b;
+    border: none;
+    color: white;
+    margin: 15px;
+  }
+  .pagenationDiv {
+    padding: 10px;
+  }
+}
+.orgchart-title-wrapper {
+  background: #ffffff 0% 0% no-repeat padding-box;
+  box-shadow: 1px 1px 15px #00000029;
+  border-radius: 5px;
+  opacity: 1;
+  min-height: 100px;
+  padding-left: 5px;
+  font-family: "Oswald", sans-serif;
+  color: #007bbe;
+  .webpart-title-text {
+    text-align: left;
+    font: normal normal 900 32px/44px Avenir LT Std !important;
+    letter-spacing: 0px;
+    color: #94c42b;
+    opacity: 1;
+    margin-left: 15px;
+  }
+  .fa {
+    font-size: 22px;
+  }
+  .department-filter-container {
+    margin-left: auto;
+  }
+}
+
+mgt-person {
+  --avatar-size: 90px;
+
+  --font-size: 21px;
+  --font-weight: 500;
+  --text-transform: none;
+
+  --line1-color: white;
+
+  --line2-font-size: 16px;
+  --line2-font-weight: 600;
+  --line2-color: #495866;
+  // --line2-text-transform: none;
+
+  --line3-font-size: 16px;
+  --line3-font-weight: 600;
+  --line3-color: #191919;
+  --line3-text-transform: none;
+
+  --details-spacing: 12px;
+}
