@@ -46,6 +46,7 @@ export default class OrgChart extends Component {
     static usersScopes = {
         scopes: ["User.Read.All"],
     };
+
     constructor(props) {
         super(props);
         this.state = {
@@ -59,10 +60,12 @@ export default class OrgChart extends Component {
             firstUrl: "",
             accessToken: "",
             flagNextBtn: true,
-            flagPrevBtn: false
+            flagPrevBtn: false,
+            count: 1,
 
         };
     }
+
 
     async componentDidMount() {
         const usersScopes = {
@@ -98,10 +101,13 @@ export default class OrgChart extends Component {
         // urls.push(newItem);
         localStorage.setItem("urls", JSON.stringify(urls));
     }
+    componentWillUnmount() {
+        localStorage.removeItem("urls");
+    }
 
     getUserCollectionWithPhoto = async (accessToken, userArray) => {
 
-        console.log("userArray", userArray.value)
+        //console.log("userArray", userArray.value)
         //let prevUrl = this.state.nextUrl;
         let userArr = userArray.value;
 
@@ -111,7 +117,7 @@ export default class OrgChart extends Component {
             let oldurl = JSON.parse(localStorage.getItem('urls')) || [];
             var newItem = userArray["@odata.nextLink"];
             oldurl.push(newItem);
-            console.log("arrayPush=", oldurl);
+            //console.log("arrayPush=", oldurl);
             localStorage.setItem('urls', JSON.stringify(oldurl));
             // if (oldurl[oldurl.length - 2]) {
             //     this.setState({ nextUrl: userArray["@odata.nextLink"], previousUrl: oldurl[oldurl.length - 2], })
@@ -124,7 +130,7 @@ export default class OrgChart extends Component {
             });
         }
         else {
-            console.log("nextlink doesnt exist")
+            //console.log("nextlink doesnt exist")
             this.setState({ flagNextBtn: false })
         }
         // this.setState({ nextUrl: userArray["@odata.nextLink"], previousUrl: prevUrl })
@@ -154,7 +160,7 @@ export default class OrgChart extends Component {
     };
 
     departmentFilterHandler = (e) => {
-        console.log("daprtment changed", e.target.value);
+        //console.log("daprtment changed", e.target.value);
         const { Users } = this.state;
         let filteredUsers = _.filter(Users, (d) => {
             if (e.target.value !== "All Departments") {
@@ -167,7 +173,7 @@ export default class OrgChart extends Component {
     };
 
     searchHandler = (e) => {
-        console.log("search changed", e.target.value);
+        //console.log("search changed", e.target.value);
         this.filterItems({ displayName: e.target.value }).then((items) => {
             this.setState({ filteredUsers: items });
         });
@@ -175,16 +181,16 @@ export default class OrgChart extends Component {
 
     async gotoNext(accessToken, url) {
 
-        let oldurl = JSON.parse(localStorage.getItem('urls')) || [];
-        console.log("array length befor prevClick", oldurl.length)
-        oldurl.splice(0, 1);
-        console.log("array length after prevClick", oldurl.length)
-        localStorage.setItem('urls', JSON.stringify(oldurl));
+        // let oldurl = JSON.parse(localStorage.getItem('urls')) || [];
+        // console.log("array length befor prevClick", oldurl.length)
+        // oldurl.splice(0, 1);
+        // console.log("array length after prevClick", oldurl.length)
+        // localStorage.setItem('urls', JSON.stringify(oldurl));
 
 
         let allUsers = await getAllUsers(accessToken, url);
         allUsers = await this.getUserCollectionWithPhoto(accessToken, allUsers);
-        console.log("all users", allUsers);
+        //console.log("all users", allUsers);
         allUsers = _.orderBy(
             allUsers,
             [(user) => user.displayName.toLowerCase()],
@@ -210,18 +216,23 @@ export default class OrgChart extends Component {
     async gotoPrev(accessToken, url) {
 
         let oldurl = JSON.parse(localStorage.getItem('urls')) || [];
-        console.log("array length befor prevClick", oldurl)
+        //console.log("array length befor prevClick", oldurl)
         //let prev = oldurl[oldurl.length - 2];
-        oldurl.splice(-1, 1);
-        console.log("array length after prevClick", oldurl.length)
+        oldurl.splice(-1, 2);
+        //console.log("array length after prevClick", oldurl.length)
         localStorage.setItem('urls', JSON.stringify(oldurl));
-        let prev = oldurl[0];
+        let countFlag = this.state.count;
+        let prev = oldurl[oldurl.length - countFlag];
+        if (countFlag - 1 === oldurl.length) {
+            alert("same")
+            this.setState({ flagPrevBtn: false })
+        }
 
 
 
         let allUsers = await getAllUsers(accessToken, prev);
         allUsers = await this.getUserCollectionWithPhoto(accessToken, allUsers);
-        console.log("all users", allUsers);
+        //console.log("all users", allUsers);
         allUsers = _.orderBy(
             allUsers,
             [(user) => user.displayName.toLowerCase()],
@@ -237,6 +248,7 @@ export default class OrgChart extends Component {
             filteredUsers: allUsers,
             //newChanges
             accessToken: accessToken,
+            count: this.state.count + 1
             //nextUrl: this.state.previousUrl
         });
         if (this.state.flagNextBtn === false) {
@@ -245,11 +257,11 @@ export default class OrgChart extends Component {
     }
 
     async filterItems(requestData) {
-        console.log(typeof (requestData));
-        console.log(requestData.length);
+        //console.log(typeof (requestData));
+        // console.log(requestData.length);
 
         if (requestData) {
-            console.log("requestData", requestData.displayName);
+            //console.log("requestData", requestData.displayName);
             let result = [];
             let allUsers = await searchUser(this.state.accessToken, requestData.displayName);
             allUsers = await this.getUserCollectionWithPhoto(this.state.accessToken, allUsers);
