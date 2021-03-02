@@ -27,8 +27,6 @@ export async function getAllUsers(accessToken, newUrl) {
         try {
             const client = GetAuthenticatedGraphClient(accessToken);
             const users = await client.api("/users").version("beta").filter("userType eq 'Member'").top(10).get();
-            // console.log("ac", users);
-            //return users.value;
             return users;
         } catch (err) {
             return null;

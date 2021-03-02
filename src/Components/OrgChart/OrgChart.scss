@@ -63,6 +63,9 @@
   .user-list-container {
     border-bottom: 2px solid #e6e4e499;
   }
+  .loaderDiv {
+    padding: 40%;
+  }
   .pagenationBtn {
     font-weight: 800;
     font-size: 18px;
@@ -88,7 +91,7 @@
   color: #007bbe;
   .webpart-title-text {
     text-align: left;
-    font: normal normal 900 32px/44px Avenir LT Std !important;
+    font: normal normal 600 32px/44px Open Sans !important;
     letter-spacing: 0px;
     color: #94c42b;
     opacity: 1;
@@ -103,7 +106,7 @@
 }
 
 mgt-person {
-  --avatar-size: 90px;
+  --avatar-size: 60px;
 
   --font-size: 21px;
   --font-weight: 500;
