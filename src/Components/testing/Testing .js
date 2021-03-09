@@ -3,6 +3,7 @@ import { Input } from "reactstrap";
 import { Providers, ProviderState } from "@microsoft/mgt-element";
 import { searchUser } from "./Tservices";
 import UserContext from "../Authentication/UserContext";
+import _ from "lodash";
 
 export default class Testing extends Component {
     static contextType = UserContext;
@@ -44,7 +45,7 @@ export default class Testing extends Component {
             <div>
                 <Input
                     placeholder="Search"
-                    onChange={this.searchHandler}
+                    onChange={_.debounce(this.searchHandler, 500)}
                 />
             </div>
         )

@@ -85,8 +85,8 @@ export async function searchUser(accessToken, search) {
         // let url = 'https://graph.microsoft.com/v1.0/users?$count=true&$search="displayName:' + search + '"'
         //console.log(url);
         const client = GetAuthenticatedGraphClient(accessToken);
-        const searchuser = await client.api(`/users`).search(`"displayName:${search}"`).get();
-        console.log("Search users", searchuser);
+        const searchuser = await client.api(`/users`).header('ConsistencyLevel', 'eventual').search(`"displayName:${search}"`).filter("userType eq 'Member'").get();
+        //console.log("Search users", searchuser);
         return searchuser;
     }
 }

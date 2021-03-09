@@ -264,20 +264,20 @@ export default function withAuthProvider(WrappedComponent) {
         }
 
         getCurrentUser() {
-            // let currentUserUrl;
-            // if (process.env.NODE_ENV === "production") {
-            //     currentUserUrl =
-            //         "https://resembleae.sharepoint.com/sites/mst/";
-            // } else if (process.env.NODE_ENV === "development") {
-            //     currentUserUrl = "_api/web/currentUser";
-            // }
-            // return new Promise((resolve, reject) => {
-            //     axios.get(`${currentUserUrl}`).then((res) => {
-            //         //console.log("Usedata", res);
-            //         resolve(res.data.UserPrincipalName);
-            //     });
-            // });
-            return 'roshit@resemblesystems.com';
+            let currentUserUrl;
+            if (process.env.NODE_ENV === "production") {
+                currentUserUrl =
+                    "https://resembleae.sharepoint.com/sites/mst/";
+            } else if (process.env.NODE_ENV === "development") {
+                currentUserUrl = "_api/web/currentUser";
+            }
+            return new Promise((resolve, reject) => {
+                axios.get(`${currentUserUrl}`).then((res) => {
+                    //console.log("Usedata", res);
+                    resolve(res.data.UserPrincipalName);
+                });
+            });
+            // return 'roshit@resemblesystems.com';
         }
     };
 }

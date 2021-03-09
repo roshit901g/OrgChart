@@ -6,6 +6,7 @@ import { getAllUsers } from "../Authentication/GraphService";
 import { getOtherUserPhoto } from "../Authentication/GraphService";
 import { searchUser } from "../Authentication/GraphService";
 import Loader from "react-loader-spinner";
+import $ from "jquery";
 
 import icon from "./Group 5902.png"
 
@@ -65,9 +66,6 @@ export default class OrgChart extends Component {
 
         };
     }
-
-
-
 
     async componentDidMount() {
         const usersScopes = {
@@ -130,6 +128,22 @@ export default class OrgChart extends Component {
         return Promise.all(requests).then((w) => userArrayWithPhoto);
     };
 
+    getUserCollectionWithPhotoForSearch = async (accessToken, userArray) => {
+        let userArr = userArray.value;
+        let userArrayWithPhoto = [];
+        let requests = userArr.map((user) => {
+            return new Promise((resolve) => {
+                getOtherUserPhoto(accessToken, user.userPrincipalName).then(
+                    (userPhoto) => {
+                        const updatedUser = _.assign(user, { personImage: userPhoto });
+                        resolve(userArrayWithPhoto.push(updatedUser));
+                    }
+                );
+            });
+        });
+        return Promise.all(requests).then((w) => userArrayWithPhoto);
+    };
+
     onSortHandler = () => {
         const usersCopy = [...this.state.filteredUsers];
         const orderedUsers = _.orderBy(
@@ -159,7 +173,7 @@ export default class OrgChart extends Component {
     };
 
     async gotoNext(accessToken, url) {
-        this.setState({ flagLoad: true })
+        this.setState({ flagLoad: true, filteredUsers: [] })
         let oldurl = JSON.parse(localStorage.getItem('urls')) || [];
         oldurl.push(url);
         localStorage.setItem('urls', JSON.stringify(oldurl));
@@ -186,7 +200,7 @@ export default class OrgChart extends Component {
     }
 
     async gotoPrev(accessToken, url) {
-        this.setState({ flagLoad: true })
+        this.setState({ flagLoad: true, filteredUsers: [] })
         let oldurl = JSON.parse(localStorage.getItem('urls')) || [];
         let prev = oldurl[oldurl.length - 2];
         oldurl.splice(-1, 1);
@@ -222,47 +236,29 @@ export default class OrgChart extends Component {
 
     async filterItems(requestData) {
 
-        // if (requestData) {
+        if (requestData.displayName.length > 0) {
+            $("#Pages").css("display", "none");
 
-        let result = [];
-        //     let allUsers = await searchUser(this.state.accessToken, requestData.displayName);
-        //     allUsers = await this.getUserCollectionWithPhoto(this.state.accessToken, allUsers);
+            let result = [];
+            let allUsers = await searchUser(this.state.accessToken, requestData.displayName);
+            allUsers = await this.getUserCollectionWithPhotoForSearch(this.state.accessToken, allUsers);
 
 
-        //     for (let item of allUsers) {
-        //         if (
-        //             item.displayName
-        //                 .toLowerCase()
-        //                 .indexOf(requestData.displayName.toLowerCase()) > -1
-        //         ) {
-        //             result.push(item);
-        //         }
-        //     }
-
-        for (let item of this.state.Users) {
-            if (
-                item.displayName
-                    .toLowerCase()
-                    .indexOf(requestData.displayName.toLowerCase()) > -1
-            ) {
-                result.push(item);
+            for (let item of allUsers) {
+                if (
+                    item.displayName
+                        .toLowerCase()
+                        .indexOf(requestData.displayName.toLowerCase()) > -1
+                ) {
+                    result.push(item);
+                }
             }
+            return Promise.resolve(result);
         }
-        return Promise.resolve(result);
-        // }
-        // else {
-        //     let result = [];
-        //     for (let item of this.state.Users) {
-        //         if (
-        //             item.displayName
-        //                 .toLowerCase()
-        //                 .indexOf(requestData.displayName.toLowerCase()) > -1
-        //         ) {
-        //             result.push(item);
-        //         }
-        //     }
-        //     return Promise.resolve(this.state.Users);
-        // }
+        else {
+            $("#Pages").css("display", "block");
+            return Promise.resolve(this.state.Users);
+        }
 
     }
 
@@ -317,7 +313,7 @@ export default class OrgChart extends Component {
                                 </InputGroupAddon>
                                 <Input
                                     placeholder="Search"
-                                    onChange={_.debounce(this.searchHandler, 300)}
+                                    onChange={_.debounce(this.searchHandler, 500)}
                                 />
                             </InputGroup>
                         </div>
@@ -338,20 +334,16 @@ export default class OrgChart extends Component {
                         </div>
                     </div>
 
-
-
-
-                    {/* {this.state.loading === false ? userListMarkup : <ContentLoader />} */}
                     {this.state.flagLoad ? <div className="loaderDiv"><center> <Loader
                         type="Puff"
                         color="#94c42b"
-                        height={100}
-                        width={100}
+                        height={90}
+                        width={90}
                     // timeout={7000} //3 secs
                     /> </center></div> : this.state.loading === false ? userListMarkup : <ContentLoader />
                     }
 
-                    <div className="pagenationDiv">
+                    <div className="pagenationDiv" id="Pages">
                         <center>
                             {this.state.flagPrevBtn ?
                                 <button type="button" className="pagenationBtn" onClick={() => { this.gotoPrev(this.state.accessToken, this.state.previousUrl) }}>&lt;&lt;</button>
